@@ -1,5 +1,5 @@
 const int buttonPin = 2;  // the number of the pushbutton pin
-
+int buttonState; //declear button state
 
 void setup() {
   // put your setup code here, to run once:
