@@ -11,9 +11,9 @@ void loop() {
   // put your main code here, to run repeatedly:
   buttonState = digitalRead(buttonPin);
   if (buttonState == HIGH) {
-    Serial.print("button pressed")
+    Serial.print("button pressed");
   }
   else {
-    
+
   }
 }
