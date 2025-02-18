@@ -17,5 +17,4 @@ jobs:
       with:
         fqbn: "arduino:avr:uno"
         sketch-paths: |
-          - ./
           - sketch_main
