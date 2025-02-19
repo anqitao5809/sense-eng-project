@@ -81,6 +81,7 @@ unsigned extract_tag() {
       Serial.print(char(msg_data_version[i]));
     }
     Serial.println(" (version)");
+    
     for (int i = 0; i < DATA_TAG_SIZE; ++i) {
       Serial.print(char(msg_data_tag[i]));
     }
