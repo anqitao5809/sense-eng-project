@@ -12,14 +12,14 @@ uint8_t buffer[BUFFER_SIZE]; // used to store an incoming data frame
 int buffer_index = 0;
 
 
-const int buttonPin = 2;  // the number of the pushbutton pin
+const int buttonPin = 3;  // the number of the pushbutton pin
 int buttonState; //declear button state
 
 void setup() {
   // put your setup code here, to run once:
     // initialize the pushbutton pin as an input:
     Serial.begin(9600);
-  pinMode(buttonPin, INPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
    ssrfid.begin(9600);
    ssrfid.listen(); 
    Serial.println(" INIT DONE");
@@ -28,14 +28,17 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   buttonState = digitalRead(buttonPin);
-  if (buttonState == HIGH) {
+  if (buttonState == LOW) {
     Serial.print("button pressed \n");
     //trigger write mode
   }
   else {
     //read mode always
-    // Serial.print("test");
-    // Serial.print(readNow());
+    //Serial.print("button not pressed \n");
+
+     Serial.print(readNow());
+     Serial.print("\n");
+
   }
 }
 
@@ -71,6 +74,9 @@ unsigned readNow() {
         return;
       }
     }    
+  }
+  else {
+    return 0; // return 0 when none exist
   }    
 }
 
