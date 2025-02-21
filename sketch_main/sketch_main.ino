@@ -35,9 +35,15 @@ void loop() {
   else {
     //read mode always
     //Serial.print("button not pressed \n");
+    
+     unsigned id_num = readNow();
+     if (id_num!=0) {
+      tone(9,262,250);
 
-     Serial.print(readNow());
+     }
+     Serial.print(id_num);
      Serial.print("\n");
+     
 
   }
 }
