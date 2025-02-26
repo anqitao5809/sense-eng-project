@@ -25,17 +25,18 @@ void setup() {
     Serial.begin(9600);
   pinMode(buttonPin, INPUT_PULLUP);
    ssrfid.begin(9600);
-   df1101sSerial.begin(9600);
-    while(!df1101s.begin(df1101sSerial)){
+   df1101sSerial.begin(115200);
+   ssrfid.listen(); 
+  while(!df1101s.begin(df1101sSerial)){
     Serial.println("Init failed, please check the wire connection!");
     delay(1000);
   }
-   ssrfid.listen(); 
    Serial.println("INIT DONE");
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  Serial.println("looping");
   buttonState = digitalRead(buttonPin);
   unsigned id_num = readNow();
   if (buttonState == LOW) { //WRITE MODE: RECORD AUDIO
