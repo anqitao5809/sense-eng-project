@@ -1,4 +1,5 @@
 #include <SoftwareSerial.h>
+#include <DFRobot_DF1101S.h>
 
 const int BUFFER_SIZE = 14; // RFID DATA FRAME FORMAT: 1byte head (value: 2), 10byte data (2byte version + 8byte tag), 2byte checksum, 1byte tail (value: 3)
 const int DATA_SIZE = 10; // 10byte data (2byte version + 8byte tag)
@@ -7,13 +8,16 @@ const int DATA_TAG_SIZE = 8; // 8byte tag
 const int CHECKSUM_SIZE = 2; // 2byte checksum
 
 SoftwareSerial ssrfid = SoftwareSerial(4,5); 
-
+SoftwareSerial df1101sSerial(0,1); //RX, TX
 uint8_t buffer[BUFFER_SIZE]; // used to store an incoming data frame 
 int buffer_index = 0;
 
+DFRobot_DF1101S df1101s;
 
+const int rfid_debounce_time_ms = 3000;
 const int buttonPin = 3;  // the number of the pushbutton pin
 int buttonState; //declear button state
+unsigned long last_audio_time;
 
 void setup() {
   // put your setup code here, to run once:
@@ -21,29 +25,38 @@ void setup() {
     Serial.begin(9600);
   pinMode(buttonPin, INPUT_PULLUP);
    ssrfid.begin(9600);
+   df1101sSerial.begin(9600);
+    while(!df1101s.begin(df1101sSerial)){
+    Serial.println("Init failed, please check the wire connection!");
+    delay(1000);
+  }
    ssrfid.listen(); 
-   Serial.println(" INIT DONE");
+   Serial.println("INIT DONE");
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   buttonState = digitalRead(buttonPin);
-  if (buttonState == LOW) {
+  unsigned id_num = readNow();
+  if (buttonState == LOW) { //WRITE MODE: RECORD AUDIO
     Serial.print("button pressed \n");
+    df1101s.switchFunction(df1101s.RECORD);
+
     //trigger write mode
   }
-  else {
+  else { //READ MODE: PLAY AUDIO
     //read mode always
     //Serial.print("button not pressed \n");
-    
-     unsigned id_num = readNow();
-     if (id_num!=0) {
+    int will_sound = LOW;
+     if (id_num!=0 && (millis()-last_audio_time)> rfid_debounce_time_ms ) {  //if reading valid rfid
       tone(9,262,250);
-
+      last_audio_time = millis();
      }
+
+    if (id_num!=0) {
      Serial.print(id_num);
      Serial.print("\n");
-     
+    }
 
   }
 }
