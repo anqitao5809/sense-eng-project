@@ -31,91 +31,93 @@ void setup() {
    ssrfid.begin(9600);
    df1101sSerial.begin(9600);
    ssrfid.listen(); 
-  while(!df1101s.begin(df1101sSerial)){
-    Serial.println("Init failed, please check the wire connection!");
-    delay(1000);
+  while(true){
+    Serial.println(df1101s.begin(df1101sSerial));
+
   }
    Serial.println("INIT DONE");
+   delay(1000);
+   Serial.println('test');
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   Serial.println("looping");
-  buttonState = digitalRead(buttonPin);
-  unsigned id_num = readNow();
-  if (buttonState == LOW) { //WRITE MODE: RECORD AUDIO
-    Serial.print("button pressed \n");
-    df1101s.start();
-    delay(1000);
-    String filename = df1101s.saveRec();
+//   buttonState = digitalRead(buttonPin);
+//   unsigned id_num = readNow();
+//   if (buttonState == LOW) { //WRITE MODE: RECORD AUDIO
+//     Serial.print("button pressed \n");
+//     df1101s.start();
+//     delay(1000);
+//     String filename = df1101s.saveRec();
 
-    //trigger write mode
-
-
-  }
-  else { //READ MODE: PLAY AUDIO
-    //read mode always
-    //Serial.print("button not pressed \n");
-    int will_sound = LOW;
-     if (id_num!=0 && (millis()-last_audio_time)> rfid_debounce_time_ms ) {  //if reading valid rfid
-      tone(9,262,250);
-      last_audio_time = millis();
-     }
-
-    if (id_num!=0) {
-     Serial.print(id_num);
-     Serial.print("\n");
-    }
-
-  }
-}
+//     //trigger write mode
 
 
-boolean writeToEEProm(String content) {
-  int i=0;
-  while (i<32767) {
-  if (EEPROM.read(i) !=0) {
-    EEPROM.put(i,content);
-  }
-  }
-}
+//   }
+//   else { //READ MODE: PLAY AUDIO
+//     //read mode always
+//     //Serial.print("button not pressed \n");
+//     int will_sound = LOW;
+//      if (id_num!=0 && (millis()-last_audio_time)> rfid_debounce_time_ms ) {  //if reading valid rfid
+//       tone(9,262,250);
+//       last_audio_time = millis();
+//      }
+
+//     if (id_num!=0) {
+//      Serial.print(id_num);
+//      Serial.print("\n");
+//     }
+
+//   }
+// }
 
 
-unsigned readNow() {
-    if (ssrfid.available() > 0){
-    bool call_extract_tag = false;
+// boolean writeToEEProm(String content) {
+//   int i=0;
+//   while (i<32767) {
+//   if (EEPROM.read(i) !=0) {
+//     EEPROM.put(i,content);
+//   }
+//   }
+// }
+
+
+// unsigned readNow() {
+//     if (ssrfid.available() > 0){
+//     bool call_extract_tag = false;
     
-    int ssvalue = ssrfid.read(); // read 
-    if (ssvalue == -1) { // no data was read
-      return;
-    }
+//     int ssvalue = ssrfid.read(); // read 
+//     if (ssvalue == -1) { // no data was read
+//       return;
+//     }
 
-    if (ssvalue == 2) { // RDM630/RDM6300 found a tag => tag incoming 
-      buffer_index = 0;
-    } else if (ssvalue == 3) { // tag has been fully transmitted       
-      call_extract_tag = true; // extract tag at the end of the function call
-    }
+//     if (ssvalue == 2) { // RDM630/RDM6300 found a tag => tag incoming 
+//       buffer_index = 0;
+//     } else if (ssvalue == 3) { // tag has been fully transmitted       
+//       call_extract_tag = true; // extract tag at the end of the function call
+//     }
 
-    if (buffer_index >= BUFFER_SIZE) { // checking for a buffer overflow (It's very unlikely that an buffer overflow comes up!)
-      Serial.println("Error: Buffer overflow detected! ");
-      return;
-    }
+//     if (buffer_index >= BUFFER_SIZE) { // checking for a buffer overflow (It's very unlikely that an buffer overflow comes up!)
+//       Serial.println("Error: Buffer overflow detected! ");
+//       return;
+//     }
     
-    buffer[buffer_index++] = ssvalue; // everything is alright => copy current value to buffer
+//     buffer[buffer_index++] = ssvalue; // everything is alright => copy current value to buffer
 
-    if (call_extract_tag == true) {
-      if (buffer_index == BUFFER_SIZE) {
-        unsigned tag = extract_tag();
-        return tag;
-      } else { // something is wrong... start again looking for preamble (value: 2)
-        buffer_index = 0;
-        return;
-      }
-    }    
-  }
-  else {
-    return 0; // return 0 when none exist
-  }    
+//     if (call_extract_tag == true) {
+//       if (buffer_index == BUFFER_SIZE) {
+//         unsigned tag = extract_tag();
+//         return tag;
+//       } else { // something is wrong... start again looking for preamble (value: 2)
+//         buffer_index = 0;
+//         return;
+//       }
+//     }    
+//   }
+//   else {
+//     return 0; // return 0 when none exist
+//   }    
 }
 
 unsigned extract_tag() {
