@@ -1,3 +1,7 @@
+#include <EEPROM.h>
+
+#include <DFRobot_DF1101S.h>
+
 #include <SoftwareSerial.h>
 #include <DFRobot_DF1101S.h>
 
@@ -25,7 +29,7 @@ void setup() {
     Serial.begin(9600);
   pinMode(buttonPin, INPUT_PULLUP);
    ssrfid.begin(9600);
-   df1101sSerial.begin(115200);
+   df1101sSerial.begin(9600);
    ssrfid.listen(); 
   while(!df1101s.begin(df1101sSerial)){
     Serial.println("Init failed, please check the wire connection!");
@@ -41,9 +45,13 @@ void loop() {
   unsigned id_num = readNow();
   if (buttonState == LOW) { //WRITE MODE: RECORD AUDIO
     Serial.print("button pressed \n");
-    df1101s.switchFunction(df1101s.RECORD);
+    df1101s.start();
+    delay(1000);
+    String filename = df1101s.saveRec();
 
     //trigger write mode
+
+
   }
   else { //READ MODE: PLAY AUDIO
     //read mode always
@@ -59,6 +67,16 @@ void loop() {
      Serial.print("\n");
     }
 
+  }
+}
+
+
+boolean writeToEEProm(String content) {
+  int i=0;
+  while (i<32767) {
+  if (EEPROM.read(i) !=0) {
+    EEPROM.put(i,content);
+  }
   }
 }
 
