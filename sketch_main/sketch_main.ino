@@ -23,34 +23,41 @@ const int buttonPin = 3;  // the number of the pushbutton pin
 int buttonState; //declear button state
 unsigned long last_audio_time;
 
+struct dictObj {
+  long key_id;
+  String audio_name;
+};
+
 void setup() {
   // put your setup code here, to run once:
     // initialize the pushbutton pin as an input:
-      pinMode(buttonPin, INPUT_PULLUP);
-    Serial.begin(115200);
-   df1101sSerial.begin(115200);
+    pinMode(buttonPin, INPUT_PULLUP);
+    Serial.begin(115200); //115200, 
+    df1101sSerial.begin(115200);
   while(!df1101s.begin(df1101sSerial)){
     Serial.println("Init failed, please check the wire connection!");
     delay(1000);
   }
-     ssrfid.begin(9600);
-   ssrfid.listen(); 
+ // ssrfid.begin(9600); //has to operate at 9600
+  // ssrfid.listen(); 
 
    Serial.println("INIT DONE");
    delay(1000);
-   Serial.println('test');
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   buttonState = digitalRead(buttonPin);
-  unsigned id_num = readNow();
+  long id_num = readNow();
+  String filename = "";
   if (buttonState == LOW) { //WRITE MODE: RECORD AUDIO
     Serial.print("button pressed \n");
+    df1101s.switchFunction(df1101s.RECORD);
+    Serial.println(df1101s.getPlayMode());
     df1101s.start();
     delay(1000);
     String filename = df1101s.saveRec();
-
+    Serial.println(filename);
     //trigger write mode
 
 
@@ -60,7 +67,8 @@ void loop() {
     //Serial.print("button not pressed \n");
     int will_sound = LOW;
      if (id_num!=0 && (millis()-last_audio_time)> rfid_debounce_time_ms ) {  //if reading valid rfid
-      tone(9,262,250);
+      Serial.println("we are playing aud");
+      df1101s.playSpecFile(filename);
       last_audio_time = millis();
      }
 
@@ -73,17 +81,18 @@ void loop() {
 }
 
 
-boolean writeToEEProm(String content) {
-  int i=0;
-  while (i<32767) {
-  if (EEPROM.read(i) !=0) {
-    EEPROM.put(i,content);
-  }
-  }
+boolean writeToEEProm(int pos, String content) {
+  // int i=0;
+  // while (i<32767) {
+  // if (EEPROM.read(i) !=0) {
+  //   EEPROM.put(i,content);
+  // }
+  // }
+  EEPROM.put(pos, content);
 }
 
 
-unsigned readNow() {
+long readNow() {
     if (ssrfid.available() > 0){
     bool call_extract_tag = false;
     
@@ -107,7 +116,7 @@ unsigned readNow() {
 
     if (call_extract_tag == true) {
       if (buffer_index == BUFFER_SIZE) {
-        unsigned tag = extract_tag();
+        long tag = extract_tag();
         return tag;
       } else { // something is wrong... start again looking for preamble (value: 2)
         buffer_index = 0;
@@ -120,7 +129,7 @@ unsigned readNow() {
   }    
 }
 
-unsigned extract_tag() {
+long extract_tag() {
     uint8_t msg_head = buffer[0];
     uint8_t *msg_data = buffer + 1; // 10 byte => data contains 2byte version + 8byte tag
     uint8_t *msg_data_version = msg_data;
@@ -166,7 +175,7 @@ unsigned extract_tag() {
       checksum ^= val;
     }
     Serial.print("Extracted Checksum (HEX): ");
-    Serial.print(checksum, HEX);
+    Serial.print(checksum, HEX); 
     if (checksum == hexstr_to_value(msg_checksum, CHECKSUM_SIZE)) { // compare calculated checksum to retrieved checksum
       Serial.print(" (OK)"); // calculated checksum corresponds to transmitted checksum!
     } else {
