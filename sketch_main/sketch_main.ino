@@ -11,8 +11,8 @@ const int DATA_VERSION_SIZE = 2; // 2byte version (actual meaning of these two b
 const int DATA_TAG_SIZE = 8; // 8byte tag
 const int CHECKSUM_SIZE = 2; // 2byte checksum
 
-SoftwareSerial ssrfid = SoftwareSerial(4,5); 
-SoftwareSerial df1101sSerial(10,9); //RX, TX
+SoftwareSerial ssrfid = SoftwareSerial(1,2); //placeholder
+SoftwareSerial df1101sSerial(10,11); //RX, TX
 uint8_t buffer[BUFFER_SIZE]; // used to store an incoming data frame 
 int buffer_index = 0;
 
@@ -32,8 +32,8 @@ void setup() {
   // put your setup code here, to run once:
     // initialize the pushbutton pin as an input:
     pinMode(buttonPin, INPUT_PULLUP);
-    Serial.begin(115200); //115200, 
-    df1101sSerial.begin(115200);
+    Serial.begin(9600); //115200, 
+    df1101sSerial.begin(9600);
   while(!df1101s.begin(df1101sSerial)){
     Serial.println("Init failed, please check the wire connection!");
     delay(1000);
@@ -50,7 +50,7 @@ void loop() {
   buttonState = digitalRead(buttonPin);
   long id_num = readNow();
   String filename = "";
-  if (buttonState == LOW) { //WRITE MODE: RECORD AUDIO
+  if (buttonState == LOW && id_num!=0) { //WRITE MODE: RECORD AUDIO
     Serial.print("button pressed \n");
     df1101s.switchFunction(df1101s.RECORD);
     Serial.println(df1101s.getPlayMode());
@@ -58,8 +58,6 @@ void loop() {
     delay(1000);
     String filename = df1101s.saveRec();
     Serial.println(filename);
-    //trigger write mode
-
 
   }
   else { //READ MODE: PLAY AUDIO
@@ -81,14 +79,34 @@ void loop() {
 }
 
 
-boolean writeToEEProm(int pos, String content) {
-  // int i=0;
-  // while (i<32767) {
-  // if (EEPROM.read(i) !=0) {
-  //   EEPROM.put(i,content);
-  // }
-  // }
-  EEPROM.put(pos, content);
+
+String search_in_eeprom_get_audio_name(long key_id) {
+  int address =0;
+  dictObj mydict;
+  for (int i =0 ; i<1024; i+=10) {
+    EEPROM.get(i,mydict);
+    if (mydict.key_id == key_id) {
+      return mydict.audio_name;
+    }
+  }
+}
+
+boolean write_or_update_audio_name(long key_id, String filename) {
+  int i =0;
+  dictObj mydict;
+  for (i;i<1024; i+=10) {
+    EEPROM.get(i,mydict);
+    if (mydict.key_id == key_id) { //if found key id, then update
+      EEPROM.put(i, dictObj{key_id,filename}); //update existing filename
+      return true;
+     }
+    if (mydict.key_id == -1) { //we have reach the end and this is a new tag
+      EEPROM.put(i, dictObj{key_id,filename});
+      return true;
+    }
+
+    return false; //oh no, looks like we ran out of EEPROM, how did we got here
+  }
 }
 
 
