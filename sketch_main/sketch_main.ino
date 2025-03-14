@@ -11,8 +11,8 @@ const int DATA_VERSION_SIZE = 2; // 2byte version (actual meaning of these two b
 const int DATA_TAG_SIZE = 8; // 8byte tag
 const int CHECKSUM_SIZE = 2; // 2byte checksum
 
-SoftwareSerial ssrfid = SoftwareSerial(1,2); //placeholder
-SoftwareSerial df1101sSerial(10,11); //RX, TX
+SoftwareSerial ssrfid = SoftwareSerial(5,6); //placeholder
+SoftwareSerial df1101sSerial(10,9); //RX, TX
 uint8_t buffer[BUFFER_SIZE]; // used to store an incoming data frame 
 int buffer_index = 0;
 
@@ -38,8 +38,8 @@ void setup() {
     Serial.println("Init failed, please check the wire connection!");
     delay(1000);
   }
- // ssrfid.begin(9600); //has to operate at 9600
-  // ssrfid.listen(); 
+  ssrfid.begin(9600); //has to operate at 9600
+   ssrfid.listen(); 
 
    Serial.println("INIT DONE");
    delay(1000);
@@ -50,15 +50,16 @@ void loop() {
   buttonState = digitalRead(buttonPin);
   long id_num = readNow();
   String filename = "";
-  if (buttonState == LOW && id_num!=0) { //WRITE MODE: RECORD AUDIO
+  if (buttonState == LOW && id_num !=0) { //WRITE MODE: RECORD AUDIO
+1
     Serial.print("button pressed \n");
     df1101s.switchFunction(df1101s.RECORD);
-    Serial.println(df1101s.getPlayMode());
     df1101s.start();
     delay(1000);
     String filename = df1101s.saveRec();
     Serial.println(filename);
-
+    Serial.println("key id: "+ id_num);
+    write_or_update_audio_name(id_num,filename);
   }
   else { //READ MODE: PLAY AUDIO
     //read mode always
@@ -66,6 +67,7 @@ void loop() {
     int will_sound = LOW;
      if (id_num!=0 && (millis()-last_audio_time)> rfid_debounce_time_ms ) {  //if reading valid rfid
       Serial.println("we are playing aud");
+      filename = search_in_eeprom_get_audio_name(id_num);
       df1101s.playSpecFile(filename);
       last_audio_time = millis();
      }
