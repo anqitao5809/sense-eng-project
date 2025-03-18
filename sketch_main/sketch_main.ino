@@ -51,7 +51,7 @@ void loop() {
   long id_num = readNow();
   String filename = "";
   if (buttonState == LOW && id_num !=0) { //WRITE MODE: RECORD AUDIO
-1
+
     Serial.print("button pressed \n");
     df1101s.switchFunction(df1101s.RECORD);
     df1101s.start();
