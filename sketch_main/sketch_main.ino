@@ -1,9 +1,9 @@
 #include <EEPROM.h>
 
-#include <DFRobot_DF1101S.h>
+// #include <DFRobot_DF1101S.h>
 
 #include <SoftwareSerial.h>
-#include <DFRobot_DF1101S.h>
+// #include <DFRobot_DF1101S.h>
 #include <SD.h>
 #include <SPI.h>
 #include <TMRpcm.h>
@@ -39,17 +39,17 @@ void setup() {
   // put your setup code here, to run once:
     // initialize the pushbutton pin as an input:
     pinMode(buttonPin, INPUT_PULLUP);
+    pinMode(A0, INPUT);
     Serial.begin(9600); //115200, 
+      SD.begin(SD_ChipSelectPin);
+    Serial.println(SD.open("/").openNextFile().name());
     audio.CSPin = SD_ChipSelectPin;
-        Serial.println("aaaaa");
 
     audio.startRecording("test.wav",16000,A0);
     delay(1000);
     audio.stopRecording("test.wav");
-        Serial.println("aaaaa");
-
+    Serial.println("playing");
     audio.play("test.wav",13);
-    Serial.println("aaaaa");
   //   df1101sSerial.begin(9600);
   // while(!df1101s.begin(df1101sSerial)){
   //   Serial.println("Init failed, please check the wire connection!");
