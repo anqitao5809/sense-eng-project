@@ -28,6 +28,7 @@ const int buttonPin = 2;  // the number of the pushbutton pin
 
 
 #define SD_ChipSelectPin 10
+#define K_speakerPin 9
 TMRpcm audio;
 
 struct dictObj {
@@ -41,15 +42,18 @@ void setup() {
     pinMode(buttonPin, INPUT_PULLUP);
     pinMode(A0, INPUT);
     Serial.begin(9600); //115200, 
-      SD.begin(SD_ChipSelectPin);
+    SD.begin(SD_ChipSelectPin);
     Serial.println(SD.open("/").openNextFile().name());
     audio.CSPin = SD_ChipSelectPin;
-
+    audio.speakerPin = K_speakerPin;
     audio.startRecording("test.wav",16000,A0);
-    delay(1000);
+    Serial.println("recording");
+    delay(5000);
+    Serial.println("done recording");
     audio.stopRecording("test.wav");
     Serial.println("playing");
-    audio.play("test.wav",13);
+    audio.volume(7); //setting volume to max or else we can't hearr
+    audio.play("test.wav");
   //   df1101sSerial.begin(9600);
   // while(!df1101s.begin(df1101sSerial)){
   //   Serial.println("Init failed, please check the wire connection!");
