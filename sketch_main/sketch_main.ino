@@ -15,7 +15,7 @@ const int DATA_TAG_SIZE = 8; // 8byte tag
 const int CHECKSUM_SIZE = 2; // 2byte checksum
 
 SoftwareSerial ssrfid = SoftwareSerial(5,6); //placeholder
-uint8_t buffer[BUFFER_SIZE]; // used to store an incoming data frame 
+uint8_t buffer_rfid[BUFFER_SIZE]; // used to store an incoming data frame 
 int buffer_index = 0;
 
 // DFRobot_DF1101S df1101s;
@@ -46,7 +46,7 @@ void setup() {
     audio.CSPin = SD_ChipSelectPin;
     audio.speakerPin = K_speakerPin;
         audio.volume(7); //setting volume to max or else we can't hearr
-
+    
     audio.startRecording("test.wav",16000,A0);
     Serial.println("recording");
     delay(5000);
@@ -69,6 +69,7 @@ void setup() {
 //void loop() {}
 void loop() {
   // put your main code here, to run repeatedly:
+  //Serial.println("looping");
   buttonState = digitalRead(buttonPin);
   long id_num = readNow();
   String filename = "";
@@ -76,13 +77,13 @@ void loop() {
 
     Serial.print("button pressed \n");
 
+    audio.startRecording(id_num + ".wav",16000,A0);
+    delay(5000); //for now record 5 second
+    audio.stopRecording(id_num + ".wav");
 
     Serial.println(filename);
     Serial.println("key id: "+ id_num);
     write_or_update_audio_name(id_num,filename);
-  }
-  else if (buttonState == LOW) {
-  Serial.println("button pressed");
   }
   else { //READ MODE: PLAY AUDIO
     //read mode always
@@ -154,7 +155,7 @@ long readNow() {
       return;
     }
     
-    buffer[buffer_index++] = ssvalue; // everything is alright => copy current value to buffer
+    buffer_rfid[buffer_index++] = ssvalue; // everything is alright => copy current value to buffer
 
     if (call_extract_tag == true) {
       if (buffer_index == BUFFER_SIZE) {
@@ -172,12 +173,12 @@ long readNow() {
 }
 
 long extract_tag() {
-    uint8_t msg_head = buffer[0];
-    uint8_t *msg_data = buffer + 1; // 10 byte => data contains 2byte version + 8byte tag
+    uint8_t msg_head = buffer_rfid[0];
+    uint8_t *msg_data = buffer_rfid + 1; // 10 byte => data contains 2byte version + 8byte tag
     uint8_t *msg_data_version = msg_data;
     uint8_t *msg_data_tag = msg_data + 2;
-    uint8_t *msg_checksum = buffer + 11; // 2 byte
-    uint8_t msg_tail = buffer[13];
+    uint8_t *msg_checksum = buffer_rfid + 11; // 2 byte
+    uint8_t msg_tail = buffer_rfid[13];
 
     // print message that was sent from RDM630/RDM6300
     Serial.println("--------");
