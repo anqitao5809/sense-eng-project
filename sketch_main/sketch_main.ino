@@ -14,7 +14,7 @@ const int DATA_VERSION_SIZE = 2; // 2byte version (actual meaning of these two b
 const int DATA_TAG_SIZE = 8; // 8byte tag
 const int CHECKSUM_SIZE = 2; // 2byte checksum
 
-SoftwareSerial ssrfid = SoftwareSerial(5,6); //placeholder
+SoftwareSerial ssrfid = SoftwareSerial(6,5); //placeholder rx,tx
 uint8_t buffer_rfid[BUFFER_SIZE]; // used to store an incoming data frame 
 int buffer_index = 0;
 
@@ -36,37 +36,46 @@ struct dictObj {
 };
 
 void setup() {
+  //tone(9, 144);
   // put your setup code here, to run once:
     // initialize the pushbutton pin as an input:
     pinMode(buttonPin, INPUT);
     pinMode(A0, INPUT);
     Serial.begin(9600); //115200 
-    SD.begin(SD_ChipSelectPin);
 
-    
-     Serial.println(SD.open("/").openNextFile().name());
+    Serial.println("before");
+
+    if(SD.begin(SD_ChipSelectPin) ==0 ) {
+      Serial.println("error, sd card not connected");
+      while(true);
+    };
+    Serial.println("before");
+   Serial.println("after");
+
      audio.CSPin = SD_ChipSelectPin;
      audio.speakerPin = K_speakerPin;
-         audio.volume(7); //setting volume to max or else we can't hearr
+     audio.volume(7); //setting volume to max or else we can't hearr
     //one time test code
-    // audio.startRecording("test.wav",16000,A0);
+    // audio.startRecording("newrecord.wav",16000,A0);
     // Serial.println("recording");
     // delay(5000);
     // Serial.println("done recording");
-    // audio.stopRecording("test.wav");
-    // Serial.println("playing");
-    // audio.play("test.wav");
+    // audio.stopRecording("newrecord.wav");
+    // Serial.println("saved recording");
+    Serial.println("playing");
+    audio.play("output.wav");
+    delay(10000);
 
   //   df1101sSerial.begin(9600);
   // while(!df1101s.begin(df1101sSerial)){
   //   Serial.println("Init failed, please check the wire connection!");
   //   delay(1000);
   // }
-  // ssrfid.begin(9600); //has to operate at 9600
-  //  ssrfid.listen(); 
+  ssrfid.begin(9600); //has to operate at 9600
+   ssrfid.listen(); 
 
-  //  Serial.println("INIT DONE");
-  //  delay(1000);
+   Serial.println("INIT DONE");
+   delay(10000);
 }
 
 //void loop() {}
@@ -75,26 +84,24 @@ void loop() {
   //Serial.println("looping");
   buttonState = digitalRead(buttonPin);
   long id_num = readNow();
-  String filename = "";
-  //if (buttonState == HIGH && id_num !=0) {
-  if (buttonState == HIGH) {
+  
+  if (buttonState == HIGH && id_num !=0) {
+  //if (buttonState == HIGH) {
     Serial.print("button pressed \n");
-
-    audio.startRecording(id_num + ".wav",16000,A0);
+    char * filename = id_num + ".wav";
+    audio.startRecording(filename,16000,A0);
     delay(5000); //for now record 5 second
-    audio.stopRecording(id_num + ".wav");
-
-    // Serial.println(filename);
-    // Serial.println("key id: "+ id_num);
-    // write_or_update_audio_name(id_num,filename);
+    audio.stopRecording(filename);
+    Serial.println("done recording");
   }
   else { //READ MODE: PLAY AUDIO
     //read mode always
     //Serial.print("button not pressed \n");
     int will_sound = LOW;
+    char * filename = "";
      if (id_num!=0 && (millis()-last_audio_time)> rfid_debounce_time_ms ) {  //if reading valid rfid
       Serial.println("we are playing aud");
-      filename = id_num + ".wav";
+      char * filename = id_num + ".wav";
       audio.play(filename);
       last_audio_time = millis();
      }
