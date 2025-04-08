@@ -64,7 +64,8 @@ void setup() {
     
     // Serial.println("saved recording");
     Serial.println("playing");
-    audio.play("test.wav");
+    //audio.play("test2.wav");
+audio.play("test.wav");
     //delay(10000);
 
   //   df1101sSerial.begin(9600);
