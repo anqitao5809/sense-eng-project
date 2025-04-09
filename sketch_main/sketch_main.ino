@@ -56,28 +56,24 @@ void setup() {
      audio.speakerPin = K_speakerPin;
      audio.volume(7); //setting volume to max or else we can't hearr
     //one time test code
-    // audio.startRecording("test2.wav",16000,A0);
-    // Serial.println("recording");
-    // delay(5000);
-    // Serial.println("done recording");
-    // audio.stopRecording("test2.wav");
-    
-    // Serial.println("saved recording");
+    audio.startRecording("test2.wav",16000,A0);
+    Serial.println("recording");
+    delay(5000);
+    Serial.println("done recording");
+    audio.stopRecording("test2.wav");
+    Serial.println("saved recording");
+
     Serial.println("playing");
-    //audio.play("test2.wav");
-audio.play("test.wav");
-    //delay(10000);
+    audio.play("test2.wav");
+    //audio.play("output.wav");
+    delay(10000);
 
-  //   df1101sSerial.begin(9600);
-  // while(!df1101s.begin(df1101sSerial)){
-  //   Serial.println("Init failed, please check the wire connection!");
-  //   delay(1000);
-  // }
-  // ssrfid.begin(9600); //has to operate at 9600
-  //  ssrfid.listen(); 
 
-  //  Serial.println("INIT DONE");
-   delay(10000);
+  ssrfid.begin(9600); //has to operate at 9600
+   ssrfid.listen(); 
+
+    Serial.println("INIT DONE");
+   //delay(10000);
 }
 
 //void loop() {}
