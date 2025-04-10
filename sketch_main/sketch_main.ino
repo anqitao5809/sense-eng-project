@@ -65,8 +65,8 @@ void setup() {
 
     Serial.println("playing");
     audio.play("test2.wav");
-    //audio.play("output.wav");
-    delay(10000);
+    //  //audio.play("output.wav");
+    //  delay(10000);
 
 
   ssrfid.begin(9600); //has to operate at 9600
@@ -83,31 +83,40 @@ void loop() {
   buttonState = digitalRead(buttonPin);
   long id_num = readNow();
   
+  //Serial.println(id_num);
+  // if (buttonState != 0 && buttonState == HIGH) {
+  //   delay(100);
+  //   Serial.println(buttonState);
+  // }
+
   if (buttonState == HIGH && id_num !=0) {
   //if (buttonState == HIGH) {
-    Serial.print("button pressed \n");
-    char * filename = id_num + ".wav";
-    audio.startRecording(filename,16000,A0);
+    Serial.println("recording");
+    String filename = id_num + ".wav";
+    Serial.println(filename);
+    audio.startRecording(filename.c_str(),16000,A0);
     delay(5000); //for now record 5 second
-    audio.stopRecording(filename);
+    audio.stopRecording(filename.c_str());
     Serial.println("done recording");
   }
   else { //READ MODE: PLAY AUDIO
     //read mode always
     //Serial.print("button not pressed \n");
     int will_sound = LOW;
-    char * filename = "";
+    String filename = "";
      if (id_num!=0 && (millis()-last_audio_time)> rfid_debounce_time_ms ) {  //if reading valid rfid
-      Serial.println("we are playing aud");
-      char * filename = id_num + ".wav";
-      audio.play(filename);
+      Serial.println("we are playing audio");
+      Serial.println(id_num);
+       filename = id_num + ".wav";
+      Serial.println(filename);
+      audio.play(filename.c_str());
       last_audio_time = millis();
      }
 
-    if (id_num!=0) {
-     Serial.print(id_num);
-     Serial.print("\n");
-    }
+    // if (id_num!=0) {
+    //  Serial.print(id_num);
+    //  Serial.print("\n");
+    // }
 
   }
 }
@@ -190,49 +199,49 @@ long extract_tag() {
     uint8_t msg_tail = buffer_rfid[13];
 
     // print message that was sent from RDM630/RDM6300
-    Serial.println("--------");
+    // Serial.println("--------");
 
-    Serial.print("Message-Head: ");
-    Serial.println(msg_head);
+    // Serial.print("Message-Head: ");
+    // Serial.println(msg_head);
 
-    Serial.println("Message-Data (HEX): ");
-    for (int i = 0; i < DATA_VERSION_SIZE; ++i) {
-      Serial.print(char(msg_data_version[i]));
-    }
-    Serial.println(" (version)");
+    // Serial.println("Message-Data (HEX): ");
+    // for (int i = 0; i < DATA_VERSION_SIZE; ++i) {
+    //   Serial.print(char(msg_data_version[i]));
+    // }
+    // Serial.println(" (version)");
     
-    for (int i = 0; i < DATA_TAG_SIZE; ++i) {
-      Serial.print(char(msg_data_tag[i]));
-    }
-    Serial.println(" (tag)");
+    // for (int i = 0; i < DATA_TAG_SIZE; ++i) {
+    //   Serial.print(char(msg_data_tag[i]));
+    // }
+    // Serial.println(" (tag)");
 
-    Serial.print("Message-Checksum (HEX): ");
-    for (int i = 0; i < CHECKSUM_SIZE; ++i) {
-      Serial.print(char(msg_checksum[i]));
-    }
-    Serial.println("");
+    // Serial.print("Message-Checksum (HEX): ");
+    // for (int i = 0; i < CHECKSUM_SIZE; ++i) {
+    //   Serial.print(char(msg_checksum[i]));
+    // }
+    // Serial.println("");
 
-    Serial.print("Message-Tail: ");
-    Serial.println(msg_tail);
+    // Serial.print("Message-Tail: ");
+    // Serial.println(msg_tail);
 
-    Serial.println("--");
+    // Serial.println("--");
 
     long tag = hexstr_to_value(msg_data_tag, DATA_TAG_SIZE);
-    Serial.print("Extracted Tag: ");
-    Serial.println(tag);
+    // Serial.print("Extracted Tag: ");
+    // Serial.println(tag);
 
     long checksum = 0;
     for (int i = 0; i < DATA_SIZE; i+= CHECKSUM_SIZE) {
       long val = hexstr_to_value(msg_data + i, CHECKSUM_SIZE);
       checksum ^= val;
     }
-    Serial.print("Extracted Checksum (HEX): ");
-    Serial.print(checksum, HEX); 
-    if (checksum == hexstr_to_value(msg_checksum, CHECKSUM_SIZE)) { // compare calculated checksum to retrieved checksum
-      Serial.print(" (OK)"); // calculated checksum corresponds to transmitted checksum!
-    } else {
-      Serial.print(" (NOT OK)"); // checksums do not match
-    }
+    // Serial.print("Extracted Checksum (HEX): ");
+    // Serial.print(checksum, HEX); 
+    // if (checksum == hexstr_to_value(msg_checksum, CHECKSUM_SIZE)) { // compare calculated checksum to retrieved checksum
+    //   Serial.print(" (OK)"); // calculated checksum corresponds to transmitted checksum!
+    // } else {
+    //   Serial.print(" (NOT OK)"); // checksums do not match
+    // }
 
 
     return tag;
