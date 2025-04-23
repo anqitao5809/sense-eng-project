@@ -25,6 +25,8 @@ const int buttonPin = 2;  // the number of the pushbutton pin
  int buttonState; //declear button state
  unsigned long last_audio_time;
 
+const int recording_cooldown = 3000;
+unsigned long last_record_time;
 
 #define SD_ChipSelectPin 10
 #define K_speakerPin 9
@@ -89,15 +91,20 @@ void loop() {
   //   Serial.println(buttonState);
   // }
 
-  if (buttonState == HIGH && id_num !=0) {
-  //if (buttonState == HIGH) {
-    Serial.println("recording");
-    String filename = id_num + ".wav";
-    Serial.println(filename);
-    audio.startRecording(filename.c_str(),16000,A0);
-    delay(5000); //for now record 5 second
-    audio.stopRecording(filename.c_str());
-    Serial.println("done recording");
+  if (buttonState == LOW ) {
+    Serial.println("button pressed");
+    delay(1000);
+    if (id_num !=0 && (millis()- last_record_time)> recording_cooldown) {
+      Serial.println("recording");
+      String filename = String(id_num) + ".wav";
+      Serial.println(filename);
+      audio.startRecording(filename.c_str(),16000,A0);
+      delay(5000); //for now record 5 second
+      audio.stopRecording(filename.c_str());
+      Serial.println("done recording");
+      last_record_time = millis();
+    }
+
   }
   else { //READ MODE: PLAY AUDIO
     //read mode always
@@ -106,8 +113,7 @@ void loop() {
     String filename = "";
      if (id_num!=0 && (millis()-last_audio_time)> rfid_debounce_time_ms ) {  //if reading valid rfid
       Serial.println("we are playing audio");
-      Serial.println(id_num);
-       filename = id_num + ".wav";
+      filename = String(id_num) + ".wav";
       Serial.println(filename);
       audio.play(filename.c_str());
       last_audio_time = millis();
