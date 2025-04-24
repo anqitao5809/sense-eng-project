@@ -91,9 +91,9 @@ void loop() {
   //   Serial.println(buttonState);
   // }
 
-  if (buttonState == LOW ) {
+  if (buttonState == HIGH ) {
     Serial.println("button pressed");
-    delay(1000);
+    //delay(1000);
     if (id_num !=0 && (millis()- last_record_time)> recording_cooldown) {
       Serial.println("recording");
       String filename = String(id_num) + ".wav";
