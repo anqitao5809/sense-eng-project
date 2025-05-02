@@ -58,15 +58,15 @@ void setup() {
      audio.speakerPin = K_speakerPin;
      audio.volume(7); //setting volume to max or else we can't hearr
     //one time test code
-    audio.startRecording("test2.wav",16000,A0);
-    Serial.println("recording");
-    delay(5000);
-    Serial.println("done recording");
-    audio.stopRecording("test2.wav");
-    Serial.println("saved recording");
+    //audio.startRecording("test2.wav",16000,A0);
+    //Serial.println("recording");
+    //delay(5000);
+    //Serial.println("done recording");
+    //audio.stopRecording("test2.wav");
+    //Serial.println("saved recording");
 
-    Serial.println("playing");
-    audio.play("test2.wav");
+    //Serial.println("playing");
+    //audio.play("test2.wav");
     //  //audio.play("output.wav");
     //  delay(10000);
 
@@ -96,6 +96,7 @@ void loop() {
     //delay(1000);
     if (id_num !=0 && (millis()- last_record_time)> recording_cooldown) {
       Serial.println("recording");
+      tone(9, 144);
       String filename = String(id_num) + ".wav";
       Serial.println(filename);
       audio.startRecording(filename.c_str(),16000,A0);
