@@ -96,15 +96,14 @@ void loop() {
     //delay(1000);
     if (id_num !=0 && (millis()- last_record_time)> recording_cooldown) {
       Serial.println("recording");
-      tone(9, 144);
-      delay(1000);
-      noTone(9);
+      playtone();
       String filename = String(id_num) + ".wav";
       Serial.println(filename);
       audio.startRecording(filename.c_str(),16000,A0);
       delay(5000); //for now record 5 second
       audio.stopRecording(filename.c_str());
       Serial.println("done recording");
+      playtone();
       last_record_time = millis();
     }
 
@@ -130,7 +129,13 @@ void loop() {
   }
 }
 
-
+void playtone() {
+      delay(500);
+      tone(9, 144);
+      delay(1500);
+      noTone(9);
+      delay(500);
+}
 
 String search_in_eeprom_get_audio_name(long key_id) {
   int address =0;
