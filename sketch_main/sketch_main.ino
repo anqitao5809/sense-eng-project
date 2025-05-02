@@ -97,6 +97,8 @@ void loop() {
     if (id_num !=0 && (millis()- last_record_time)> recording_cooldown) {
       Serial.println("recording");
       tone(9, 144);
+      delay(1000);
+      noTone(9);
       String filename = String(id_num) + ".wav";
       Serial.println(filename);
       audio.startRecording(filename.c_str(),16000,A0);
