@@ -118,6 +118,9 @@ void loop() {
       filename = String(id_num) + ".wav";
       Serial.println(filename);
       audio.play(filename.c_str());
+      while (audio.isPlaying() == true) {
+        //prevent other action while playing
+      }
       last_audio_time = millis();
      }
 
@@ -130,11 +133,9 @@ void loop() {
 }
 
 void playtone() {
-      delay(500);
       tone(9, 144);
       delay(1500);
       noTone(9);
-      delay(500);
 }
 
 String search_in_eeprom_get_audio_name(long key_id) {
